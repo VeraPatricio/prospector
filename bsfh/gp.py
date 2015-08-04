@@ -254,7 +254,7 @@ class ExpSquared(GaussianProcess):
 
     def construct_diagonal(self):
         s, asq, lsq = self._params
-        diagonal = self._sigma**2 + s**2
+        diagonal = self._sigma**2 * s
         return diagonal
 
 
@@ -290,7 +290,7 @@ class Matern(GaussianProcess):
 
     def construct_diagonal(self):
         s, asq, lsq = self._params
-        diagonal = self._sigma**2 + s**2
+        diagonal = self._sigma**2 * s
         return diagonal
 
 
