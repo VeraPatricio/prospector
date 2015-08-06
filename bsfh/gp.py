@@ -220,7 +220,7 @@ class GaussianProcess(object):
         if np.any(self._flux != 1):
             # Noise is fractional
             assert (influx is not None) and (len(influx) == len(inwave))
-            Sigma = influx[:,None] * Sigma * inwave[None, :]
+            Sigma = influx[:,None] * Sigma * influx[None, :]
         Sigma[dinds] += self.construct_diagonal(test=True)
         return Sigma
 
