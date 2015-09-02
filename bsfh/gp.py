@@ -252,7 +252,9 @@ class ExpSquared(GaussianProcess):
         Sigma = asq * np.exp(-(xstar[:,None] - x[None,:])**2 / (2 * lsq))
         return Sigma
 
-    def construct_diagonal(self):
+    def construct_diagonal(self, test=False):
+        if test:
+             return 0.0
         s, asq, lsq = self._params
         diagonal = self._sigma**2 * s
         return diagonal
@@ -285,10 +287,12 @@ class Matern(GaussianProcess):
         s, asq, lsq = self._params
         a, l = np.sqrt(asq), np.sqrt(lsq)
         Sigma = np.sqrt(3) * (xstar[:,None] - x[None,:]) / l
-        Sigma = (1 + Sigma) * np.exp(-Sigma)
+        Sigma = asq * (1 + Sigma) * np.exp(-Sigma)
         return Sigma
 
-    def construct_diagonal(self):
+    def construct_diagonal(self, test=False):
+        if test:
+            return 0.0
         s, asq, lsq = self._params
         diagonal = self._sigma**2 * s
         return diagonal
