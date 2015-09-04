@@ -229,7 +229,7 @@ class ExpSquared(GaussianProcess):
 
     @property
     def kernel_properties(self):
-        return [3]
+        return [4]
 
     def kernel_to_params(self, kernel):
         """Translate a vector of kernel parameters to a tuple of
@@ -241,13 +241,13 @@ class ExpSquared(GaussianProcess):
               * ``a`` is an amplitude
               * ``l`` is a length scale, in the same units as the input wave vector.
         """
-        s, asquared, lsquared = np.exp(kernel).tolist()
-        return s, asquared, lsquared
+        s, asquared, lsquared, sadd = np.exp(kernel).tolist()
+        return s, asquared, lsquared, sadd
 
     def construct_kernel(self, x, xstar):
         """Construct an exponential squared covariance matrix.
         """
-        s, asq, lsq = self._params
+        s, asq, lsq, sadd = self._params
         a, l = np.sqrt(asq), np.sqrt(lsq)
         Sigma = asq * np.exp(-(xstar[:,None] - x[None,:])**2 / (2 * lsq))
         return Sigma
@@ -255,8 +255,8 @@ class ExpSquared(GaussianProcess):
     def construct_diagonal(self, test=False):
         if test:
              return 0.0
-        s, asq, lsq = self._params
-        diagonal = self._sigma**2 * s
+        s, asq, lsq, sadd = self._params
+        diagonal = self._sigma**2 * s + sadd
         return diagonal
 
 
@@ -264,7 +264,7 @@ class Matern(GaussianProcess):
 
     @property
     def kernel_properties(self):
-        return [3]
+        return [4]
 
     def kernel_to_params(self, kernel):
         """Translate a vector of kernel parameters to a tuple of
@@ -278,13 +278,13 @@ class Matern(GaussianProcess):
               * ``l`` is a length scale, in the same units as the
                 input wave vector.
         """
-        s, asquared, lsquared = np.exp(kernel).tolist()
+        s, asquared, lsquared, sadd = np.exp(kernel).tolist()
         return s, asquared, lsquared
 
     def construct_kernel(self, x, xstar):
         """Construct a Matern kernel covariance matrix, for \nu=3/2.
         """
-        s, asq, lsq = self._params
+        s, asq, lsq, sadd = self._params
         a, l = np.sqrt(asq), np.sqrt(lsq)
         Sigma = np.sqrt(3) * (xstar[:,None] - x[None,:]) / l
         Sigma = asq * (1 + Sigma) * np.exp(-Sigma)
@@ -293,8 +293,8 @@ class Matern(GaussianProcess):
     def construct_diagonal(self, test=False):
         if test:
             return 0.0
-        s, asq, lsq = self._params
-        diagonal = self._sigma**2 * s
+        s, asq, lsq, sadd = self._params
+        diagonal = self._sigma**2 * s + sadd
         return diagonal
 
 
@@ -316,7 +316,10 @@ class PhotOutlier(GaussianProcess):
             jitter = kernel[-1]
         return jitter, locs, amps
 
-    def construct_covariance(self, **extras):
+    def construct_kernel(self, x, xstar, **kwargs):
+        return np.zeros([len(self._sigma), len(self._sigma)])
+    
+    def construct_diagonal(self, test=False, **extras):
         jitter, locs, amps = self._params
         # round to the nearest index
         locs = locs.astype(int)
@@ -329,15 +332,7 @@ class PhotOutlier(GaussianProcess):
         assert len(flux) > np.max(locs)
         assert len(flux) == nw
 
-        Sigma = np.zeros([nw, nw])
-        dind = np.arange(nw)
-        Sigma[(dind, dind)] += self._sigma**2 + (jitter * flux)**2
-        Sigma[(locs, locs)] += (amps * flux[locs])**2
+        diagonal = self._sigma**2 + (jitter * flux)**2
+        diagonal += (amps * flux[locs])**2
 
-        return Sigma
-
-    def construct_covariance_cross(self, **extras):
-        nw = len(self._sigma)
-        Sigma = self.construct_covariance()
-        Sigma[(np.arange(nw), np.arange(nw))] -= self._sigma**2
-        return Sigma
+        return diagonal
