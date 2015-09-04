@@ -136,10 +136,11 @@ class SedModel(ProspectorParams):
     def spec_gp_params(self, theta=None, **extras):
         if theta is not None:
             self.set_parameters(theta)
-        pars = ['gp_jitter', 'gp_amplitude', 'gp_length']
-        defaults = [[0.0], [0.0], [1.0]]
-        vals = [self.params.get(p, d) for p, d in zip(pars, defaults)]
-        return  tuple(vals)
+        pars = ['gp_jitter', 'gp_amplitude', 'gp_length', 'gp_jitter_add']
+        defaults = [[0.0], [0.0], [1.0], [0.0]]
+        s, a, l, sa = [self.params.get(p, d) for p, d in zip(pars, defaults)]
+        vals = np.log(np.array([s[0], a[0]**2, l[0]**2, sa[0]]))
+        return vals
     
     def phot_gp_params(self, theta=None, **extras):
         if theta is not None:
