@@ -254,7 +254,7 @@ class ExpSquared(GaussianProcess):
 
     def construct_diagonal(self, test=False):
         if test:
-             return 0.0
+            return 0.0
         s, asq, lsq, sadd = self._params
         diagonal = self._sigma**2 * s + sadd
         return diagonal
@@ -318,7 +318,7 @@ class PhotOutlier(GaussianProcess):
 
     def construct_kernel(self, x, xstar, **kwargs):
         return np.zeros([len(self._sigma), len(self._sigma)])
-    
+
     def construct_diagonal(self, test=False, **extras):
         jitter, locs, amps = self._params
         # round to the nearest index
