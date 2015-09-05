@@ -13,10 +13,10 @@ class LikelihoodFunction(object):
         self.lnspec = lnspec
 
     def lnlike_spec(self, spec_mu, obs=None, gp=None,
-                    spec_noise_fractional=False, **extras):
-        """Calculate the likelihood of the spectroscopic data given the
-        spectroscopic model.  Allows for the use of a gaussian process
-        covariance matrix for multiplicative residuals.
+                    flux=None, **extras):
+        """Calculate the likelihood of the spectroscopic data given
+        the spectroscopic model.  Allows for the use of a gaussian
+        process covariance matrix for multiplicative residuals.
 
         :param spec_mu:
             The mean model spectrum, in linear or logarithmic units, including
@@ -40,10 +40,9 @@ class LikelihoodFunction(object):
             `lnlikelihood`.  If gp is supplied, the `wavelength` entry
             in the obs dictionary must exist
 
-        :param spec_noise_fractional: (optional)
-            If true then the amplitude of the GP is taken to be a fraction of
-            the model flux.
-
+        :param flux: (optional, default: None)
+            If set, use the value to scale the GP covariance matrix.
+             
         :returns lnlikelhood:
             The natural logarithm of the likelihood of the data given the mean
             model spectrum.
@@ -56,12 +55,12 @@ class LikelihoodFunction(object):
         mask = obs.get('mask', np.ones(len(obs['spectrum']), dtype=bool))
         delta = (obs['spectrum'] - spec_mu)[mask]
         if gp is not None:
-            if spec_noise_fractional:
-                flux = spec_mu[mask]
+            if flux is not None:
+                gpflux = flux[mask]
             else:
-                flux = 1
+                gpflux = 1
             try:
-                gp.compute(obs['wavelength'][mask], obs['unc'][mask], flux=flux)
+                gp.compute(obs['wavelength'][mask], obs['unc'][mask], flux=gpflux)
                 return gp.lnlikelihood(delta)
             except(LinAlgError):
                 return np.nan_to_num(-np.inf)
