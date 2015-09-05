@@ -42,7 +42,7 @@ class LikelihoodFunction(object):
 
         :param flux: (optional, default: None)
             If set, use the value to scale the GP covariance matrix.
-             
+
         :returns lnlikelhood:
             The natural logarithm of the likelihood of the data given the mean
             model spectrum.
@@ -60,13 +60,15 @@ class LikelihoodFunction(object):
             else:
                 gpflux = 1
             try:
-                gp.compute(obs['wavelength'][mask], obs['unc'][mask], flux=gpflux)
+                gp.compute(obs['wavelength'][mask], obs['unc'][mask],
+                           flux=gpflux)
                 return gp.lnlikelihood(delta)
             except(LinAlgError):
                 return np.nan_to_num(-np.inf)
 
         var = obs['unc'][mask]**2
-        lnp = -0.5*( (delta**2/var).sum() + np.log(2*np.pi*var).sum() )
+        lnp = -0.5*((delta**2/var).sum() +
+                    np.log(2*np.pi*var).sum())
         return lnp
 
     def lnlike_phot(self, phot_mu, obs=None, gp=None,
@@ -76,8 +78,9 @@ class LikelihoodFunction(object):
         covariance matrix.
 
         :param phot_mu:
-            The mean model sed, in linear flux units (i.e. maggies), including
-            e.g. calibration and sky emission and nebular emission.
+            The mean model sed, in linear flux units (i.e. maggies),
+            including e.g. calibration and sky emission and nebular
+            emission.
 
         :param obs: (optional)
             A dictionary of the observational data, including the keys
@@ -86,19 +89,19 @@ class LikelihoodFunction(object):
               *``maggies_unc`` the uncertainty of same length as ``maggies``
               *``phot_mask`` optional boolean array of same length as
                ``maggies``
-              *``filters`` optional list of sedpy.observate.Filter objects,
-               necessary if using fixed filter groups with different gp
-               amplitudes for each group.
-           If not supplied then the obs dictionary given at initialization will
-           be used.
+              *``filters`` optional list of sedpy.observate.Filter
+               objects, necessary if using fixed filter groups with
+               different gp amplitudes for each group.
+           If not supplied then the obs dictionary given at
+           initialization will be used.
 
         :param gp: (optional)
             A Gaussian process object with the methods ``compute()`` and
             ``lnlikelihood()``.
 
         :param fractional:
-            Treat the GP amplitudes as additional *fractional* uncertainties,
-            i.e., multiplicative uncertainties.
+            Treat the GP amplitudes as additional *fractional*
+            uncertainties, i.e., multiplicative uncertainties.
 
         :returns lnlikelhood:
             The natural logarithm of the likelihood of the data given the mean
@@ -120,7 +123,8 @@ class LikelihoodFunction(object):
             return gp.lnlikelihood(delta)
 
         var = (obs['maggies_unc'][mask])**2
-        lnp = -0.5*( (delta**2/var).sum() + np.log(2*np.pi*var).sum() )
+        lnp = -0.5*((delta**2/var).sum() +
+                    np.log(2*np.pi*var).sum())
         return lnp
 
     def ln_prior_prob(self, theta, model=None):
@@ -130,8 +134,8 @@ class LikelihoodFunction(object):
 
     def lnpostfn(self, theta, model=None, obs=None,
                  sps=None, gp=None, **extras):
-        """A specific implementation of a posterior probability function, as an
-        example.
+        """A specific implementation of a posterior probability
+        function, as an example.
         """
         if model is None:
             model = self.model
