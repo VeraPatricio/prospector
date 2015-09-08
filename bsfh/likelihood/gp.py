@@ -279,7 +279,7 @@ class Matern(GaussianProcess):
                 input wave vector.
         """
         s, asquared, lsquared, sadd = np.exp(kernel).tolist()
-        return s, asquared, lsquared
+        return s, asquared, lsquared, sadd
 
     def construct_kernel(self, x, xstar):
         """Construct a Matern kernel covariance matrix, for \nu=3/2.

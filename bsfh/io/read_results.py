@@ -66,14 +66,13 @@ def model_comp(theta, model, obs, sps, photflag=0, gp=None):
         if type(cal) is not float:
             cal = cal[mask]
         try:
-            s, a, l = model.spec_gp_params()
-            gp.kernel[:] = np.log(np.array([s[0],a[0]**2,l[0]**2]))
+            gp.kernel[:] = model.spec_gp_params()
             spec = obs['spectrum'][mask]
             if logarithmic:
                 gp.compute(wave, obs['unc'][mask])
                 delta = gp.predict(spec - mu, wave)
             else:
-                gp.compute(wave, obs['unc'][mask], flux=mu)
+                gp.compute(wave, obs['unc'][mask], flux=sed)
                 delta = gp.predict(spec - mu)
             if len(delta) == 2:
                 delta = delta[0]
