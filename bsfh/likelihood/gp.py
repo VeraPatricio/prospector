@@ -286,7 +286,7 @@ class Matern(GaussianProcess):
         """
         s, asq, lsq, sadd = self._params
         a, l = np.sqrt(asq), np.sqrt(lsq)
-        Sigma = np.sqrt(3) * (xstar[:,None] - x[None,:]) / l
+        Sigma = np.sqrt(3) * np.abs(xstar[:,None] - x[None,:]) / l
         Sigma = asq * (1 + Sigma) * np.exp(-Sigma)
         return Sigma
 
