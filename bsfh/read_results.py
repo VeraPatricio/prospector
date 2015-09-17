@@ -21,15 +21,16 @@ def read_pickles(sample_file, model_file=None,
     :returns model:
         The bsfh.sedmodel object. 
     """
-    sample_results = pickle.load( open(sample_file, 'rb'))
+    with open(sample_file, 'rb') as sf:
+        sample_results = pickle.load(sf)
     powell_results = None
     model = None
     if model_file:
-        try:
-            mf = pickle.load( open(model_file, 'rb'))
-        except(AttributeError):
-            mf = load( open(model_file, 'rb'))
-       
+        with open(model_file, 'rb') as modfile:
+            try:
+                mf = pickle.load(modfile)
+            except(AttributeError):
+                mf = load(modfile)
         inmod = mf['model']
         powell_results = mf['powell']
 

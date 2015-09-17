@@ -157,7 +157,7 @@ class GaussianProcess(object):
 
         mu = np.dot(Sigma_cross, cho_solve(self.factorized_Sigma, residual))
         cov = Sigma_test - np.dot(Sigma_cross, cho_solve(self.factorized_Sigma,
-                                                         -Sigma_cross.T))
+                                                         Sigma_cross.T))
         return mu, cov
 
     @property
