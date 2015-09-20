@@ -336,3 +336,33 @@ class PhotOutlier(GaussianProcess):
         diagonal += (amps * flux[locs])**2
 
         return diagonal
+
+
+def sample_gaussian(nsample, Sigma):
+    """Samples from a multivariate correlated gaussian.
+    Appendix A.2 of RW06
+
+    :param nsamples:
+        Number of desired samples.
+
+    :param Sigma:
+        Covariance matrix, ndarray of shape (ndim, ndim).  
+        Must be positive definite.
+
+    :returns samples:
+        ndarray, shape(ndim, nsample)
+    """
+    # Dimension of the data
+    n = Sigma.shape[0]
+    # Draw uncorrelated normally distributed random numbers
+    u = np.random.randn(nsample*n).reshape(n, nsample)
+    # Get the Cholesky decomposition of the covariance matrix.  This
+    # is the `matrix square root` of the covariance matrix, as a
+    # lower-triangular matrix.  NB the upper triangle is filled with 
+    # random values and should be zeroed out.
+    fSigma = cho_factor(Sigma, lower=True)
+    # Transform the uncorrelated random vectors into the covariant
+    # space by multiplying by the square root of the covariance matrix
+    x = np.dot(np.tril(fSigma[0]), u)
+    # Done
+    return x
