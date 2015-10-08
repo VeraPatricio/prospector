@@ -33,6 +33,7 @@ class GaussianProcess(object):
         self._params = None
         self.data_clean = False
         self.update_data(wave, sigma, flux)
+        self.low_level_noise_params = [None, None]
 
     def reset(self):
         """Blank out the cached values.
@@ -224,6 +225,13 @@ class GaussianProcess(object):
         Sigma[dinds] += self.construct_diagonal(test=True)
         return Sigma
 
+    def low_level_noise(self, x, xstar):
+        """ Add a low level correlated noise component with parameters
+        set by hand through the low_level_noise_params attribute.
+        """
+        asq, lsq = self.low_level_noise_params
+        return asq * np.exp(-(xstar[:,None] - x[None,:])**2 / (2 * lsq))
+
 
 class ExpSquared(GaussianProcess):
 
@@ -250,8 +258,10 @@ class ExpSquared(GaussianProcess):
         s, asq, lsq, sadd = self._params
         a, l = np.sqrt(asq), np.sqrt(lsq)
         Sigma = asq * np.exp(-(xstar[:,None] - x[None,:])**2 / (2 * lsq))
+        if None not in self.low_level_noise_params:
+            Sigma += self.low_level_noise(x, xstar)
         return Sigma
-
+        
     def construct_diagonal(self, test=False):
         if test:
             return 0.0
